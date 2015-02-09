@@ -242,10 +242,11 @@ class BIP32Key(object):
 
     def PublicKey(self):
         "Return compressed public key encoding"
+        padx = (b'\0'*32 + int_to_string(self.K.pubkey.point.x()))[-32:]
         if self.K.pubkey.point.y() & 1:
-            ck = b'\3'+int_to_string(self.K.pubkey.point.x())
+            ck = b'\3'+padx
         else:
-            ck = b'\2'+int_to_string(self.K.pubkey.point.x())
+            ck = b'\2'+padx
         return ck
 
 
