@@ -208,7 +208,7 @@ class BIP32Key(object):
         K_i = ecdsa.VerifyingKey.from_public_point(point, curve=SECP256k1)
 
         # Construct and return a new BIP32Key
-        return BIP32Key(secret=K_i, chain=Ir, depth=self.depth, index=i, fpr=self.Fingerprint(), public=True)
+        return BIP32Key(secret=K_i, chain=Ir, depth=self.depth+1, index=i, fpr=self.Fingerprint(), public=True)
 
 
     # Public methods
