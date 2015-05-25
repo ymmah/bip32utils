@@ -3,3 +3,4 @@
 *.pyo
 /bip32utils.egg-info
 /dist
+/build
