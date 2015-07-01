@@ -12,7 +12,7 @@ setup(
     url = 'http://github.com/satoshilabs/bip32utils',
     description = 'Utilities for generating and using Bitcoin Hierarchical Deterministic wallets (BIP0032).',
     license = 'MIT',
-    requires = ['ecdsa'],
+    install_requires = ['ecdsa'],
     packages = ['bip32utils'],
     scripts = ['bin/bip32gen']
 )
