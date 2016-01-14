@@ -38,7 +38,7 @@ class BIP32Key(object):
         if not len(entropy) >= MIN_ENTROPY_LEN/8:
             raise ValueError("Initial entropy %i must be at least %i bits" %
                                 (len(entropy), MIN_ENTROPY_LEN))
-        I = hmac.new("Bitcoin seed", entropy, hashlib.sha512).digest()
+        I = hmac.new(b"Bitcoin seed", entropy, hashlib.sha512).digest()
         Il, Ir = I[:32], I[32:]
         # FIXME test Il for 0 or less than SECP256k1 prime field order
         key = BIP32Key(secret=Il, chain=Ir, depth=0, index=0, fpr='\0\0\0\0', public=False)
@@ -268,7 +268,7 @@ class BIP32Key(object):
 
     def Address(self):
         "Return compressed public key address"
-        vh160 = '\x00'+self.Identifier()
+        vh160 = b'\x00'+self.Identifier()
         return Base58.check_encode(vh160)
 
 
@@ -276,7 +276,7 @@ class BIP32Key(object):
         "Returns private key encoded for wallet import"
         if self.public:
             raise Exception("Publicly derived deterministic keys have no private half")
-        raw = '\x80' + self.k.to_string() + '\x01' # Always compressed
+        raw = b'\x80' + self.k.to_string() + b'\x01' # Always compressed
         return Base58.check_encode(raw)
 
 

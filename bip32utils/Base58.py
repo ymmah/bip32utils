@@ -13,8 +13,12 @@ __base58_radix = len(__base58_alphabet)
 def __string_to_int(data):
     "Convert string of bytes Python integer, MSB"
     val = 0
+    
+    if type(data) == str:
+        data = bytearray(data)
+
     for (i, c) in enumerate(data[::-1]):
-        val += (256**i)*ord(c)
+        val += (256**i)*c
     return val
 
 
@@ -29,7 +33,7 @@ def encode(data):
         enc = __base58_alphabet[val] + enc
 
     # Pad for leading zeroes
-    n = len(data)-len(data.lstrip('\0'))
+    n = len(data)-len(data.lstrip(b'\0'))
     return __base58_alphabet[0]*n + enc
 
 
