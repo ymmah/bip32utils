@@ -1,6 +1,9 @@
 Introduction
 ============
 
+.. image:: https://travis-ci.org/satoshilabs/bip32utils.svg?branch=master
+    :target: https://travis-ci.org/satoshilabs/bip32utils
+
 The bip32utils library is a pure Python implementation of Bitcoin
 hierarchical deterministic wallet ("HD Wallet") ECDSA key generation
 as specified in BIP0032 (Bitcoin Improvement Proposal #0032).
@@ -40,38 +43,40 @@ This library installs the bip32gen script into $PREFIX/bin, which
 wraps a command-line interface around the BIP32Key class functionality
 described in a later section:
 
-## Script Parameters
-```
-$ bip32gen -h
-usage: bip32gen [-h] [-x] [-X] -i {entropy,xprv,xpub} [-n AMOUNT]
-                [-f FROM_FILE] [-F TO_FILE] -o OUTPUT_TYPE [-v] [-d]
-                chain [chain ...]
+Script Parameters
+-----------------
 
-Create hierarchical deterministic wallet addresses
+::
 
-positional arguments:
-  chain                 list of hierarchical key specifiers
+    $ bip32gen -h
+    usage: bip32gen [-h] [-x] [-X] -i {entropy,xprv,xpub} [-n AMOUNT]
+                    [-f FROM_FILE] [-F TO_FILE] -o OUTPUT_TYPE [-v] [-d]
+                    chain [chain ...]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -x, --input-hex       input supplied as hex-encoded ascii
-  -X, --output-hex      output generated (where applicable) as hex-encoded
-                        ascii
-  -i {entropy,xprv,xpub}, --input-type {entropy,xprv,xpub}
-                        source material to generate key
-  -n AMOUNT, --amount AMOUNT
-                        amount of entropy to to read (bits), None for all of
-                        input
-  -f FROM_FILE, --from-file FROM_FILE
-                        filespec of input data, '-' for stdin
-  -F TO_FILE, --to-file TO_FILE
-                        filespec of output data, '-' for stdout
-  -o OUTPUT_TYPE, --output-type OUTPUT_TYPE
-                        output types, comma separated, from
-                        addr|privkey|wif|pubkey|xprv|xpub|chain
-  -v, --verbose         verbose output, not for machine parsing
-  -d, --debug           enable debugging output
-```
+    Create hierarchical deterministic wallet addresses
+
+    positional arguments:
+      chain                 list of hierarchical key specifiers
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -x, --input-hex       input supplied as hex-encoded ascii
+      -X, --output-hex      output generated (where applicable) as hex-encoded
+                            ascii
+      -i {entropy,xprv,xpub}, --input-type {entropy,xprv,xpub}
+                            source material to generate key
+      -n AMOUNT, --amount AMOUNT
+                            amount of entropy to to read (bits), None for all of
+                            input
+      -f FROM_FILE, --from-file FROM_FILE
+                            filespec of input data, '-' for stdin
+      -F TO_FILE, --to-file TO_FILE
+                            filespec of output data, '-' for stdout
+      -o OUTPUT_TYPE, --output-type OUTPUT_TYPE
+                            output types, comma separated, from
+                            addr|privkey|wif|pubkey|xprv|xpub|chain
+      -v, --verbose         verbose output, not for machine parsing
+      -d, --debug           enable debugging output
 
 The user specifies the type of input data (currently from entropy, a
 serialized extended private key, or serialized extended public key),
@@ -85,10 +90,10 @@ specifier(s) start with the first hierarchical child index to create.
 For example, to generate a new master wallet key from entropy and
 output the serialized extended private key for that to stdout:
 
-```
-$ bip32gen -i entropy -f /dev/random -n 128 -o xprv -F - m
-xprv9s21ZrQH143K3eqKCaAW9CvAiKR8SHdikQnR8dVs8eBxC9fYtW69k1gLRTG5o2Rn3gtz651yFGzxRFjtfjLQHmh4kT7YF3vZcZgGdfX7ZVS
-```
+::
+
+    $ bip32gen -i entropy -f /dev/random -n 128 -o xprv -F - m
+    xprv9s21ZrQH143K3eqKCaAW9CvAiKR8SHdikQnR8dVs8eBxC9fYtW69k1gLRTG5o2Rn3gtz651yFGzxRFjtfjLQHmh4kT7YF3vZcZgGdfX7ZVS
 
 To generate the BIP0032 test vector #1, using entropy
 supplied as a hex-encoded string on stdin, and output the private
@@ -96,27 +101,27 @@ ECDSA key, wallet import format for that private ECDSA key, public
 ECDSA key, address, and serialized extended private and public keys,
 hex encoding where applicable, and writing to stdout:
 
-```
-$ echo 000102030405060708090A0B0C0D0E0F | \
-    bip32gen -v \
-    -i entropy -f - -x \
-    -o privkey,wif,pubkey,addr,xprv,xpub -F - -X \
-    m \
-    m/0h \
-    m/0h/1 \
-    m/0h/1/2h \
-    m/0h/1/2h/2 \
-    m/0h/1/2h/2/1000000000
-```
+::
+
+    $ echo 000102030405060708090A0B0C0D0E0F | \
+        bip32gen -v \
+        -i entropy -f - -x \
+        -o privkey,wif,pubkey,addr,xprv,xpub -F - -X \
+        m \
+        m/0h \
+        m/0h/1 \
+        m/0h/1/2h \
+        m/0h/1/2h/2 \
+        m/0h/1/2h/2/1000000000
 
 (output not listed)
 
 BIP0032 outlines a hierarchy where individual "accounts" and key series have the following form:
 
-```
-m/ih/0/k - Receiving address series for account 'i', with 'k' as index
-m/ih/1/k - Change address series for spends from account 'i', with 'k' as index
-```
+::
+
+    m/ih/0/k - Receiving address series for account 'i', with 'k' as index
+    m/ih/1/k - Change address series for spends from account 'i', with 'k' as index
 
 So, to give someone the ability to create receving addresses for
 account 0, (but not the ability to spend from those addresses), one
@@ -124,69 +129,74 @@ would export an _extended public key_ for m/0h/0 (we'll use again the
 entropy from BIP0032 test vector #1 for purpose of explanation, but of
 course this would be unique for each situation):
 
-```
-$ echo 000102030405060708090A0B0C0D0E0F | \
-    bip32gen \
-    -i entropy -f - -x \
-    -o xpub -F - \
-    m/0h/0
-xpub6ASuArnXKPbfEVRpCesNx4P939HDXENHkksgxsVG1yNp9958A33qYoPiTN9QrJmWFa2jNLdK84bWmyqTSPGtApP8P7nHUYwxHPhqmzUyeFG
-```
+::
+
+    $ echo 000102030405060708090A0B0C0D0E0F | \
+        bip32gen \
+        -i entropy -f - -x \
+        -o xpub -F - \
+        m/0h/0
+    xpub6ASuArnXKPbfEVRpCesNx4P939HDXENHkksgxsVG1yNp9958A33qYoPiTN9QrJmWFa2jNLdK84bWmyqTSPGtApP8P7nHUYwxHPhqmzUyeFG
 
 Then, to derive public child keys, that person would run the
 key generator using that extended public key as input:
 
-```
-$ echo xpub6ASuArnXKPbfEVRpCesNx4P939HDXENHkksgxsVG1yNp9958A33qYoPiTN9QrJmWFa2jNLdK84bWmyqTSPGtApP8P7nHUYwxHPhqmzUyeFG | \
-     bip32gen \
-     -i xpub -f - \
-     -o addr -F - \
-     0 1 2 3 4 5 6 7 8 9
-1BvgsfsZQVtkLS69NvGF8rw6NZW2ShJQHr
-1B1TKfsCkW5LQ6R1kSXUx7hLt49m1kwz75
-1D2LvY1T3yT4xWgoXkXhAbh1fbY39owifJ
-1L71JnrWfB45Z1g2et1zeDAkzrpY8eyJMH
-1ACa2mfirthEwmnHVHcBEAVfTHJkajpjod
-1CR1rZqA8cwbohoj9bNmcrYxx31Zx2jw4c
-1PkyqPChrqwM1dee8KTMpsWWBuXgmGVNoi
-1L3HVcGagSUEb2d24SfHV7Kyu6kUNpDL51
-17JbSP83rPWmbdcdtiiTNqBE8MgGN8kmUk
-1MWb4Pv4ZCUmbnFgA5D3MtYyhMh4q8KCrd
-```
+::
+
+    $ echo xpub6ASuArnXKPbfEVRpCesNx4P939HDXENHkksgxsVG1yNp9958A33qYoPiTN9QrJmWFa2jNLdK84bWmyqTSPGtApP8P7nHUYwxHPhqmzUyeFG | \
+         bip32gen \
+         -i xpub -f - \
+         -o addr -F - \
+         0 1 2 3 4 5 6 7 8 9
+    1BvgsfsZQVtkLS69NvGF8rw6NZW2ShJQHr
+    1B1TKfsCkW5LQ6R1kSXUx7hLt49m1kwz75
+    1D2LvY1T3yT4xWgoXkXhAbh1fbY39owifJ
+    1L71JnrWfB45Z1g2et1zeDAkzrpY8eyJMH
+    1ACa2mfirthEwmnHVHcBEAVfTHJkajpjod
+    1CR1rZqA8cwbohoj9bNmcrYxx31Zx2jw4c
+    1PkyqPChrqwM1dee8KTMpsWWBuXgmGVNoi
+    1L3HVcGagSUEb2d24SfHV7Kyu6kUNpDL51
+    17JbSP83rPWmbdcdtiiTNqBE8MgGN8kmUk
+    1MWb4Pv4ZCUmbnFgA5D3MtYyhMh4q8KCrd
+
 An offline machine could generate the corresponding private keys to
-spend from those addresses by using an _extended private key_ for the
+spend from those addresses by using an *extended private key* for the
 account:
-```
-$ echo 000102030405060708090A0B0C0D0E0F | \
-    bip32gen \
-    -i entropy -f - -x \
-    -o xprv -F - \
-    m/0h/0
-xprv9wTYmMFdV23N21MM6dLNavSQV7Sj7meSPXx6AV5eTdqqGLjycVjb115Ec5LgRAXscPZgy5G4jQ9csyyZLN3PZLxoM1h3BoPuEJzsgeypdKj
-```
+
+::
+
+    $ echo 000102030405060708090A0B0C0D0E0F | \
+        bip32gen \
+        -i entropy -f - -x \
+        -o xprv -F - \
+        m/0h/0
+    xprv9wTYmMFdV23N21MM6dLNavSQV7Sj7meSPXx6AV5eTdqqGLjycVjb115Ec5LgRAXscPZgy5G4jQ9csyyZLN3PZLxoM1h3BoPuEJzsgeypdKj
+
 Then to generate the corresponding private keys (here shown in wallet import format):
-```
-$ echo xprv9wTYmMFdV23N21MM6dLNavSQV7Sj7meSPXx6AV5eTdqqGLjycVjb115Ec5LgRAXscPZgy5G4jQ9csyyZLN3PZLxoM1h3BoPuEJzsgeypdKj | \
-     bip32gen \
-     -i xprv -f - \
-     -o wif -F - \
-     0 1 2 3 4 5 6 7 8 9
-L3dzheSvHWc2scJdiikdZmYdFzPcvZMAnT5g62ikVWZdBewoWpL1
-L22jhG8WTNmuRtqFvzvpnhe32F8FefJFfsLJpSr1CYsRrZCyTwKZ
-KwhVMKLLSMt7DemnUxhSftkdqPjWYmPKt31nmV3BB7TdVaMFzqgP
-KySK2geQrXWYR7f2p9C9Exr4CLngFQnnzQegSaKAfxNupqecSwdU
-KxSKj3b3EdHSyN3C5sSwRL7TMmxpEVkJ7Cw4fQTMUYXsCZRbmBAP
-L5kxG5qokHeTJSwco5JzCEdAy5TN2M2Tj2QvxGpvVuSVP5bJRAUT
-L3oTQGyHQvE3GkRQJkgPs9vY8NRTxdwacHu9Xu9QBPTpgHCSGume
-KxABnXp7SiuWi218c14KkjEMV7SjcfXnvsWaveNVxWZU1Rwi8zNQ
-L1Zku8j3mCiiHxZdo6NDLHv6jcA1JyNufUSHBMiznML38vNr9Agh
-L46bxscw878ytxNHro7ghNXuybUv8aNJAY1UudH1HUxD2pecBhR8
-```
+
+::
+
+    $ echo xprv9wTYmMFdV23N21MM6dLNavSQV7Sj7meSPXx6AV5eTdqqGLjycVjb115Ec5LgRAXscPZgy5G4jQ9csyyZLN3PZLxoM1h3BoPuEJzsgeypdKj | \
+         bip32gen \
+         -i xprv -f - \
+         -o wif -F - \
+         0 1 2 3 4 5 6 7 8 9
+    L3dzheSvHWc2scJdiikdZmYdFzPcvZMAnT5g62ikVWZdBewoWpL1
+    L22jhG8WTNmuRtqFvzvpnhe32F8FefJFfsLJpSr1CYsRrZCyTwKZ
+    KwhVMKLLSMt7DemnUxhSftkdqPjWYmPKt31nmV3BB7TdVaMFzqgP
+    KySK2geQrXWYR7f2p9C9Exr4CLngFQnnzQegSaKAfxNupqecSwdU
+    KxSKj3b3EdHSyN3C5sSwRL7TMmxpEVkJ7Cw4fQTMUYXsCZRbmBAP
+    L5kxG5qokHeTJSwco5JzCEdAy5TN2M2Tj2QvxGpvVuSVP5bJRAUT
+    L3oTQGyHQvE3GkRQJkgPs9vY8NRTxdwacHu9Xu9QBPTpgHCSGume
+    KxABnXp7SiuWi218c14KkjEMV7SjcfXnvsWaveNVxWZU1Rwi8zNQ
+    L1Zku8j3mCiiHxZdo6NDLHv6jcA1JyNufUSHBMiznML38vNr9Agh
+    L46bxscw878ytxNHro7ghNXuybUv8aNJAY1UudH1HUxD2pecBhR8
 
 Python bip32utils Library
 =========================
 
-## The BIP32Key Class
+The BIP32Key Class
+------------------
 
 The bip32utils python library currently has a single class, BIP32Key,
 which encapsulates a single node in a BIP0032 wallet hierarchy. A
@@ -208,11 +218,12 @@ public children.
 
 In other words, a private BIP32Key internally stores an ECDSA private
 key, an ECDSA public key, and some additional pseudorandom bits named
-the _chain code_.  Public BIP32Keys are only different in that the
+the *chain code*.  Public BIP32Keys are only different in that the
 secret half of the ECDSA key pair does not exist; only the public half
 does.
 
-## Creating a BIP32Key
+Creating a BIP32Key
+-------------------
 
 A BIP32Key may come into existence in one of four ways:
 
@@ -264,7 +275,7 @@ calling the instance member function SetPublic(), which discards the
 internal private ECDSA key half and sets an internal flag.
 
 When creating a child BIP32Key from an existing private BIP32Key, one
-may also select from an alternate set of child keys, called _hardened_
+may also select from an alternate set of child keys, called *hardened*
 keys, by adding the constant BIP32_HARDEN to the integer index.  A
 hardened child BIP32Key avoids a known issue with non-hardened child
 keys where a compromise of one child key may result in a compromise of
