@@ -1,6 +1,9 @@
 Introduction
 ============
 
+.. image:: https://travis-ci.org/satoshilabs/bip32utils.svg?branch=master
+    :target: https://travis-ci.org/satoshilabs/bip32utils
+
 The bip32utils library is a pure Python implementation of Bitcoin
 hierarchical deterministic wallet ("HD Wallet") ECDSA key generation
 as specified in BIP0032 (Bitcoin Improvement Proposal #0032).
