@@ -41,7 +41,7 @@ class BIP32Key(object):
         I = hmac.new(b"Bitcoin seed", entropy, hashlib.sha512).digest()
         Il, Ir = I[:32], I[32:]
         # FIXME test Il for 0 or less than SECP256k1 prime field order
-        key = BIP32Key(secret=Il, chain=Ir, depth=0, index=0, fpr='\0\0\0\0', public=False)
+        key = BIP32Key(secret=Il, chain=Ir, depth=0, index=0, fpr=b'\0\0\0\0', public=False)
         if public:
             key.SetPublic()
         return key
@@ -285,14 +285,14 @@ class BIP32Key(object):
         if self.public is True and private is True:
             raise Exception("Cannot export an extended private key from a public-only deterministic key")
         version = EX_MAIN_PRIVATE if private else EX_MAIN_PUBLIC
-        depth = chr(self.depth)
+        depth = bytes(bytearray([self.depth]))
         fpr = self.parent_fpr
         child = struct.pack('>L', self.index)
         chain = self.C
         if self.public is True or private is False:
             data = self.PublicKey()
         else:
-            data = '\x00' + self.PrivateKey()
+            data = b'\x00' + self.PrivateKey()
         raw = version+depth+fpr+child+chain+data
         if not encoded:
             return raw
