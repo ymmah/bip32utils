@@ -21,3 +21,4 @@ install:
 
 script:
     - python setup.py install
+    - diff -u <(./tests/bip0032-vectors.sh) ./tests/bip0032-vectors.out
