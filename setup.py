@@ -14,5 +14,5 @@ setup(
     license = 'MIT',
     install_requires = ['ecdsa'],
     packages = ['bip32utils'],
-    scripts = ['bin/bip32gen']
+    scripts = ['bip32gen']
 )

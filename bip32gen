@@ -122,8 +122,8 @@ def ReadEntropy(args):
       raise Exception("Insufficient entropy provided")
    if args.verbose:
       src = 'stdin' if args.from_file == '-' else args.from_file
-      print "Creating master key and seed using %i bits of entropy read from" % args.amount, src
-      print "entropy:", entropy.encode('hex')
+      print("Creating master key and seed using %i bits of entropy read from %s" % (args.amount, src))
+      print("entropy: %s" % entropy.encode('hex'))
    return entropy
 
 
@@ -206,11 +206,11 @@ if __name__ == "__main__":
          input_data['entropy'] = ReadEntropy(args)
       elif args.input_type == 'xprv':
          if args.verbose:
-            print "Importing starting key from extended private key"
+            print("Importing starting key from extended private key")
          input_data['xprv'] = ReadInput(args.from_file, None, False).strip()
       elif args.input_type == 'xpub':
          if args.verbose:
-            print "Importing starting key from extended public key"
+            print("Importing starting key from extended public key")
          input_data['xpub'] = ReadInput(args.from_file, None, False).strip()
    except Exception as e:
       ErrorExit(e)
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
    for keyspec in args.chain:
       if args.verbose:
-         print "Keyspec:", keyspec
+         print("Keyspec: %s" % keyspec)
       key = ParseKeyspec(args, input_data, keyspec, cache)
 
       # Output fields in command-line supplied order
