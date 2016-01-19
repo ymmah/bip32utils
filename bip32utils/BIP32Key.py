@@ -25,13 +25,15 @@ FIELD_ORDER     = SECP256k1.curve.p()
 INFINITY        = ecdsa.ellipticcurve.INFINITY
 EX_MAIN_PRIVATE = codecs.decode('0488ade4', 'hex') # Version string for mainnet extended private keys
 EX_MAIN_PUBLIC  = codecs.decode('0488b21e', 'hex') # Version string for mainnet extended public keys
+EX_TEST_PRIVATE = codecs.decode('04358394', 'hex') # Version string for testnet extended private keys
+EX_TEST_PUBLIC  = codecs.decode('043587CF', 'hex') # Version string for testnet extended public keys
 
 class BIP32Key(object):
 
     # Static initializers to create from entropy or external formats
     #
     @staticmethod
-    def fromEntropy(entropy, public=False):
+    def fromEntropy(entropy, public=False, testnet=False):
         "Create a BIP32Key using supplied entropy >= MIN_ENTROPY_LEN"
         if entropy == None:
             entropy = os.urandom(MIN_ENTROPY_LEN/8) # Python doesn't have os.random()
@@ -41,7 +43,7 @@ class BIP32Key(object):
         I = hmac.new(b"Bitcoin seed", entropy, hashlib.sha512).digest()
         Il, Ir = I[:32], I[32:]
         # FIXME test Il for 0 or less than SECP256k1 prime field order
-        key = BIP32Key(secret=Il, chain=Ir, depth=0, index=0, fpr=b'\0\0\0\0', public=False)
+        key = BIP32Key(secret=Il, chain=Ir, depth=0, index=0, fpr=b'\0\0\0\0', public=False, testnet=testnet)
         if public:
             key.SetPublic()
         return key
@@ -61,9 +63,17 @@ class BIP32Key(object):
         # Verify address version/type
         version = raw[:4]
         if version == EX_MAIN_PRIVATE:
-            keytype = 'xprv'
+            is_testnet = False
+            is_pubkey = False
+        elif version == EX_TEST_PRIVATE:
+            is_testnet = True
+            is_pubkey = False
         elif version == EX_MAIN_PUBLIC:
-            keytype = 'xpub'
+            is_testnet = False
+            is_pubkey = True
+        elif version == EX_TEST_PUBLIC:
+            is_testnet = True
+            is_pubkey = True
         else:
             raise ValueError("unknown extended key version")
 
@@ -75,7 +85,7 @@ class BIP32Key(object):
         secret = raw[45:78]
 
         # Extract private key or public key point
-        if keytype == 'xprv':
+        if not is_pubkey:
             secret = secret[1:]
         else:
             # Recover public curve point from compressed key
@@ -88,15 +98,14 @@ class BIP32Key(object):
             point = ecdsa.ellipticcurve.Point(SECP256k1.curve, x, y)
             secret = ecdsa.VerifyingKey.from_public_point(point, curve=SECP256k1)
 
-        is_pubkey = (keytype == 'xpub')
-        key = BIP32Key(secret=secret, chain=chain, depth=depth, index=child, fpr=fpr, public=is_pubkey)
+        key = BIP32Key(secret=secret, chain=chain, depth=depth, index=child, fpr=fpr, public=is_pubkey, testnet=is_testnet)
         if not is_pubkey and public:
             key = key.SetPublic()
         return key
 
 
     # Normal class initializer
-    def __init__(self, secret, chain, depth, index, fpr, public=False):
+    def __init__(self, secret, chain, depth, index, fpr, public=False, testnet=False):
         """
         Create a public or private BIP32Key using key material and chain code.
 
@@ -128,6 +137,7 @@ class BIP32Key(object):
         self.depth = depth
         self.index = index
         self.parent_fpr = fpr
+        self.testnet = testnet
 
 
     # Internal methods not intended to be called externally
@@ -174,7 +184,7 @@ class BIP32Key(object):
         secret = (b'\0'*32 + int_to_string(k_int))[-32:]
         
         # Construct and return a new BIP32Key
-        return BIP32Key(secret=secret, chain=Ir, depth=self.depth+1, index=i, fpr=self.Fingerprint(), public=False)
+        return BIP32Key(secret=secret, chain=Ir, depth=self.depth+1, index=i, fpr=self.Fingerprint(), public=False, testnet=self.testnet)
 
 
     def CKDpub(self, i):
@@ -209,7 +219,7 @@ class BIP32Key(object):
         K_i = ecdsa.VerifyingKey.from_public_point(point, curve=SECP256k1)
 
         # Construct and return a new BIP32Key
-        return BIP32Key(secret=K_i, chain=Ir, depth=self.depth+1, index=i, fpr=self.Fingerprint(), public=True)
+        return BIP32Key(secret=K_i, chain=Ir, depth=self.depth+1, index=i, fpr=self.Fingerprint(), public=True, testnet=self.testnet)
 
 
     # Public methods
@@ -269,7 +279,8 @@ class BIP32Key(object):
 
     def Address(self):
         "Return compressed public key address"
-        vh160 = b'\x00'+self.Identifier()
+        addressversion = b'\x00' if not self.testnet else b'\x6f'
+        vh160 = addressversion + self.Identifier()
         return Base58.check_encode(vh160)
 
 
@@ -277,7 +288,8 @@ class BIP32Key(object):
         "Returns private key encoded for wallet import"
         if self.public:
             raise Exception("Publicly derived deterministic keys have no private half")
-        raw = b'\x80' + self.k.to_string() + b'\x01' # Always compressed
+        addressversion = b'\x80' if not self.testnet else b'\xef'
+        raw = addressversion + self.k.to_string() + b'\x01' # Always compressed
         return Base58.check_encode(raw)
 
 
@@ -285,7 +297,10 @@ class BIP32Key(object):
         "Return extended private or public key as string, optionally Base58 encoded"
         if self.public is True and private is True:
             raise Exception("Cannot export an extended private key from a public-only deterministic key")
-        version = EX_MAIN_PRIVATE if private else EX_MAIN_PUBLIC
+        if not self.testnet:
+            version = EX_MAIN_PRIVATE if private else EX_MAIN_PUBLIC
+        else:
+            version = EX_TEST_PRIVATE if private else EX_TEST_PUBLIC
         depth = bytes(bytearray([self.depth]))
         fpr = self.parent_fpr
         child = struct.pack('>L', self.index)
