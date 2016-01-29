@@ -6,7 +6,8 @@
 
 from hashlib import sha256
 
-__base58_alphabet = b'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+__base58_alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+__base58_alphabet_bytes = b'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 __base58_radix = len(__base58_alphabet)
 
 
@@ -25,21 +26,17 @@ def __string_to_int(data):
 
 def encode(data):
     "Encode string into Bitcoin base58"
-    enc = bytearray()
+    enc = ''
     val = __string_to_int(data)
     while val >= __base58_radix:
         val, mod = divmod(val, __base58_radix)
-        enc.append(__base58_alphabet[mod]) 
+        enc = __base58_alphabet[mod] + enc
     if val:
-        enc.append(__base58_alphabet[val]) 
+        enc = __base58_alphabet[val] + enc
 
     # Pad for leading zeroes
     n = len(data)-len(data.lstrip(b'\0'))
-    # TODO python2 xrange
-    for i in range(n):
-        enc.append(__base58_alphabet[0])
-
-    return bytes(enc[::-1])
+    return enc+__base58_alphabet[0]*n
 
 
 def check_encode(raw):
@@ -52,7 +49,7 @@ def decode(data):
     "Decode Bitcoin base58 format to string"
     val = 0
     for (i, c) in enumerate(data[::-1]):
-        val += __base58_alphabet.find(c) * (__base58_radix**i)
+        val += __base58_alphabet_bytes.find(c) * (__base58_radix**i)
     dec = bytearray()
     while val >= 256:
         val, mod = divmod(val, 256)
