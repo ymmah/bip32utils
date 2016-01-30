@@ -78,7 +78,11 @@ class BIP32Key(object):
             raise ValueError("unknown extended key version")
 
         # Extract remaining fields
-        depth = ord(raw[4])
+        # Python 2.x compatibility
+        if type(raw[4]) == int:
+            depth = raw[4]
+        else:
+            depth = ord(raw[4])
         fpr = raw[5:9]
         child = struct.unpack(">L", raw[9:13])[0]
         chain = raw[13:45]
