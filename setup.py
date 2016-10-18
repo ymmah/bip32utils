@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = 'bip32utils',
-    version = '0.3-1',
+    version = '0.3-2',
     author = 'Johnathan Corgan, Corgan Labs',
     author_email = 'johnathan@corganlabs.com',
     maintainer = 'Pavol Rusnak, SatoshiLabs',
