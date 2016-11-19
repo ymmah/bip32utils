@@ -93,7 +93,8 @@ class BIP32Key(object):
             secret = secret[1:]
         else:
             # Recover public curve point from compressed key
-            lsb = ord(secret[0]) & 1
+            # Python3 FIX
+            lsb = secret[0] & 1 if type(secret[0]) == int else ord(secret[0]) & 1
             x = string_to_int(secret[1:])
             ys = (x**3+7) % FIELD_ORDER # y^2 = x^3 + 7 mod p
             y = sqrt_mod(ys, FIELD_ORDER)
