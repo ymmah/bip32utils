@@ -4,12 +4,12 @@ from setuptools import setup
 
 setup(
     name = 'bip32utils',
-    version = '0.3-2',
+    version = '0.3-3',
     author = 'Johnathan Corgan, Corgan Labs',
     author_email = 'johnathan@corganlabs.com',
-    maintainer = 'Pavol Rusnak, SatoshiLabs',
-    maintainer_email = 'stick@satoshilabs.com',
-    url = 'http://github.com/satoshilabs/bip32utils',
+    maintainer = 'Pavol Rusnak',
+    maintainer_email = 'stick@gk2.sk',
+    url = 'http://github.com/prusnak/bip32utils',
     description = 'Utilities for generating and using Bitcoin Hierarchical Deterministic wallets (BIP0032).',
     license = 'MIT',
     install_requires = ['ecdsa'],
