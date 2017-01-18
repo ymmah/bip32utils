@@ -73,7 +73,7 @@ def ParseKeyspec(args, input_data, keyspec, cache):
          key = cache[acc]
       except KeyError:
          public = (acc == 'M')
-         key = BIP32Key.fromEntropy(entropy=input_data['entropy'], public=public)
+         key = BIP32Key.fromEntropy(entropy=input_data['entropy'], public=public, testnet=args.testnet)
          cache[acc] = key
    elif args.input_type == 'xprv':
       try:
@@ -152,6 +152,8 @@ def GetArgs():
                        help='enable debugging output')
    parser.add_argument('chain', nargs='+',
                         help='list of hierarchical key specifiers')
+   parser.add_argument('-t', '--testnet', action='store_true', default=False,
+                       help='use testnet format')
 
    args = parser.parse_args()
 
