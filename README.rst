@@ -77,6 +77,8 @@ Script Parameters
                             addr|privkey|wif|pubkey|xprv|xpub|chain
       -v, --verbose         verbose output, not for machine parsing
       -d, --debug           enable debugging output
+      -t, --testnet         use testnet format
+
 
 The user specifies the type of input data (currently from entropy, a
 serialized extended private key, or serialized extended public key),
