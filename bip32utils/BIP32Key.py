@@ -23,10 +23,10 @@ CURVE_GEN       = ecdsa.ecdsa.generator_secp256k1
 CURVE_ORDER     = CURVE_GEN.order()
 FIELD_ORDER     = SECP256k1.curve.p()
 INFINITY        = ecdsa.ellipticcurve.INFINITY
-EX_MAIN_PRIVATE = codecs.decode('0488ade4', 'hex') # Version string for mainnet extended private keys
-EX_MAIN_PUBLIC  = codecs.decode('0488b21e', 'hex') # Version string for mainnet extended public keys
-EX_TEST_PRIVATE = codecs.decode('04358394', 'hex') # Version string for testnet extended private keys
-EX_TEST_PUBLIC  = codecs.decode('043587CF', 'hex') # Version string for testnet extended public keys
+EX_MAIN_PRIVATE = [ codecs.decode('0488ade4', 'hex') ] # Version strings for mainnet extended private keys
+EX_MAIN_PUBLIC  = [ codecs.decode('0488b21e', 'hex'), codecs.decode('049d7cb2', 'hex') ] # Version strings for mainnet extended public keys
+EX_TEST_PRIVATE = [ codecs.decode('04358394', 'hex') ] # Version strings for testnet extended private keys
+EX_TEST_PUBLIC  = [ codecs.decode('043587CF', 'hex') ] # Version strings for testnet extended public keys
 
 class BIP32Key(object):
 
@@ -62,16 +62,16 @@ class BIP32Key(object):
 
         # Verify address version/type
         version = raw[:4]
-        if version == EX_MAIN_PRIVATE:
+        if version in EX_MAIN_PRIVATE:
             is_testnet = False
             is_pubkey = False
-        elif version == EX_TEST_PRIVATE:
+        elif version in EX_TEST_PRIVATE:
             is_testnet = True
             is_pubkey = False
-        elif version == EX_MAIN_PUBLIC:
+        elif version in EX_MAIN_PUBLIC:
             is_testnet = False
             is_pubkey = True
-        elif version == EX_TEST_PUBLIC:
+        elif version in EX_TEST_PUBLIC:
             is_testnet = True
             is_pubkey = True
         else:
@@ -288,6 +288,19 @@ class BIP32Key(object):
         vh160 = addressversion + self.Identifier()
         return Base58.check_encode(vh160)
 
+    def P2WPKHoP2SHAddress(self):
+        "Return P2WPKH over P2SH segwit address"
+        pk_bytes = self.PublicKey()
+        assert len(pk_bytes) == 33 and (pk_bytes.startswith(b"\x02") or pk_bytes.startswith(b"\x03")), \
+            "Only compressed public keys are compatible with p2sh-p2wpkh addresses. " \
+            "See https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki."
+        pk_hash = hashlib.new('ripemd160', sha256(pk_bytes).digest()).digest()
+        push_20 = bytes.fromhex('0014')
+        script_sig = push_20 + pk_hash
+        address_bytes = hashlib.new('ripemd160', sha256(script_sig).digest()).digest()
+        prefix = b"\xc4" if self.testnet else b"\x05"
+        return Base58.check_encode(prefix + address_bytes)
+
 
     def WalletImportFormat(self):
         "Returns private key encoded for wallet import"
@@ -303,9 +316,9 @@ class BIP32Key(object):
         if self.public is True and private is True:
             raise Exception("Cannot export an extended private key from a public-only deterministic key")
         if not self.testnet:
-            version = EX_MAIN_PRIVATE if private else EX_MAIN_PUBLIC
+            version = EX_MAIN_PRIVATE[0] if private else EX_MAIN_PUBLIC[0]
         else:
-            version = EX_TEST_PRIVATE if private else EX_TEST_PUBLIC
+            version = EX_TEST_PRIVATE[0] if private else EX_TEST_PUBLIC[0]
         depth = bytes(bytearray([self.depth]))
         fpr = self.parent_fpr
         child = struct.pack('>L', self.index)
